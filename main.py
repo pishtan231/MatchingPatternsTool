@@ -31,10 +31,8 @@ def get_args():
 class HandlePatterns():
     def __init__(self, args):
         self.matched_patterns = []
-
         if args.file_read:
             self.file_name = args.file_read
-
         if args.patterns_map:
             self.patterns_from_user = args.patterns_map
 
@@ -75,17 +73,16 @@ class HandlePatterns():
             file_open_replace.write(save_to_replace)
             file_open_replace.close()
 
-    @classmethod
-    def search_match_in_row(cls, pattern, match_start, offset, match_end):
+    def search_match_in_row(self, pattern, match_start, match_end):
         return {
             "Pattern": ("%s" % pattern),
             "Start_offset": {
-                "Decimal": ("%d" % (offset + match_start)),
-                "Hexadecimal": ("%X" % (offset + match_start)),
+                "Decimal": ("%d" % (match_start)),
+                "Hexadecimal": ("%X" % (match_start)),
             },
             "End_offset": {
-                "Decimal": ("%d" % (offset + match_end)),
-                "Hexadecimal": ("%X" % (offset + match_end)),
+                "Decimal": ("%d" % (match_end)),
+                "Hexadecimal": ("%X" % (match_end)),
             }
         }
 
@@ -129,8 +126,8 @@ class HandlePatterns():
 
                     self.matched_patterns.append(
                         self.search_match_in_row(
-                            origin_pattern, find_offset, find_offset, find_offset + len_pattern,
-                                                                      )
+                            origin_pattern, find_offset, find_offset + len_pattern,
+                        )
                     )
 
                     match = regex_search(buffer, match + 1)
@@ -138,7 +135,6 @@ class HandlePatterns():
                 if len(buffer) <= len_pattern:
                     if not os.path.exists(DIR_NAME):
                         os.makedirs(DIR_NAME)
-                    base_filename = uuid.uuid4()
                     file_name_unique = os.path.join(DIR_NAME, str(BASE_FILE_NAME) + __FILE_NAME_SUFFIX__)
                     with open(file_name_unique, 'w', encoding='utf-8') as file_to_write:
                         json.dump(self.matched_patterns, file_to_write, ensure_ascii=False, indent=4)
@@ -161,7 +157,7 @@ class HandlePatterns():
         format_byte = "({})".format(byte_to_find) + "\\1*"
         regex = re.compile(format_byte)
 
-        data = {'repeating_bytes': []}
+        data = dict(repeating_bytes=[])
         iter_start_point = 0
 
         file_to_read = open(self.file_name, 'rb')
