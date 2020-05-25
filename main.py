@@ -20,7 +20,7 @@ def get_args():
     p.add_argument('-z', '--patterns_list', nargs='+', help='<Required> Set flag', required=False, default=[])
     p.add_argument('-g', '--patterns_map', type=json.loads)
     p.add_argument('-r', '--replace', type=bool, default=False)
-    p.add_argument('-f', '--file', type=str, metavar='FILE', dest='file_read', help='file to read search pattern from')
+    p.add_argument('-f', '--file', type=str, metavar='FILE', dest='file_read', help='file to search pattern from')
     p.add_argument(
         '-p', '--pattern', type=str, metavar='PATTERN',
         dest='ppattern',
