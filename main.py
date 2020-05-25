@@ -38,7 +38,16 @@ class HandlePatterns():
             self.patterns_from_user = args.patterns_map
 
             pool = mp.Pool(processes=len(args.patterns_map.keys()))
-            pool.map(self.find_pattern, args.patterns_map.keys())
+            matched_patterns = pool.map(self.find_pattern, args.patterns_map.keys())
+            pool.close()
+            pool.join()
+
+            if not os.path.exists(DIR_NAME):
+                os.makedirs(DIR_NAME)
+            file_name_unique = os.path.join(DIR_NAME, str(BASE_FILE_NAME) + __FILE_NAME_SUFFIX__)
+            with open(file_name_unique, 'w') as file_to_write:
+                json.dump(list(filter(None.__ne__, matched_patterns)), file_to_write, indent=4)
+
             if args.replace:
                 self.replace_patterns()
         if args.patterns_list:
@@ -129,19 +138,14 @@ class HandlePatterns():
                             origin_pattern, find_offset, find_offset + len_pattern,
                         )
                     )
-
                     match = regex_search(buffer, match + 1)
                     match = -1 if match is None else match.start()
                 if len(buffer) <= len_pattern:
-                    if not os.path.exists(DIR_NAME):
-                        os.makedirs(DIR_NAME)
-                    file_name_unique = os.path.join(DIR_NAME, str(BASE_FILE_NAME) + __FILE_NAME_SUFFIX__)
-                    with open(file_name_unique, 'w', encoding='utf-8') as file_to_write:
-                        json.dump(self.matched_patterns, file_to_write, ensure_ascii=False, indent=4)
-                    return
+
+                    return self.matched_patterns[-1] if any(self.matched_patterns) else None
         except Exception as e:
-            sys.stdout.write('Format input to pattern failed, Error: {} \n'.format(e.__repr__()));
-            sys.stdout.flush()
+            sys.stdout.write('Format input to pattern failed, Error: {} \n'.format(e.__repr__()))
+            # sys.stdout.flush()
 
     def read_in_chunks(self, fileObj, chunkSize=1024):
         while True:
