@@ -3,6 +3,7 @@ import multiprocessing as mp
 import json
 from argparse import ArgumentParser
 from sys import stdout
+import sys
 import os
 import uuid
 
@@ -109,7 +110,6 @@ class HandlePatterns():
             buffer = fh_read.read(len_pattern + read_size)
             match = regex_search(buffer)
             match = -1 if match is None else match.start()
-
             while True:
                 if match == -1:
                     offset += read_size
@@ -140,8 +140,8 @@ class HandlePatterns():
                         json.dump(self.matched_patterns, file_to_write, ensure_ascii=False, indent=4)
                     return
         except Exception as e:
-            print('err')
-            print(e)
+            sys.stdout.write('Format input to pattern failed, Error: {} \n'.format(e.__repr__()));
+            sys.stdout.flush()
 
     def read_in_chunks(self, fileObj, chunkSize=1024):
         while True:

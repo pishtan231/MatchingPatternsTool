@@ -93,7 +93,7 @@ Will produce JSON, e.g:
         }
     ]
 }
-
+********
 
 python bin24.py -g {\"C54C6BA5FEE1\":\"value1\"\,\"CDD0F08AE8\":\"value3\"} -f some_file.bin 
 
