@@ -11,23 +11,11 @@ STDOUT = stdout
 DESCRIPTION = ''  # noqa
 __FILE_NAME_SUFFIX__ = '.json'
 DIR_NAME = 'output_files'
+BASE_FILE_NAME = uuid.uuid4()
 
 
 def get_args():
     p = ArgumentParser(description=DESCRIPTION)
-
-    # def add(s, **kwargs):
-    #     args = s.split(':')
-    # 
-    #     value = args.pop(2)
-    #     if value: kwargs['type'] = eval(value)
-    #     value = args.pop(2)
-    #     if value: kwargs['metavar'] = value
-    #     value = args.pop(2)
-    #     if value: kwargs['dest'] = value
-    # 
-    #     p.add_argument(*args, **kwargs)
-
     p.add_argument('-z', '--patterns_list', nargs='+', help='<Required> Set flag', required=False, default=[])
     p.add_argument('-g', '--patterns_map', type=json.loads)
     p.add_argument('-r', '--replace', type=bool, default=False)
@@ -49,9 +37,6 @@ class HandlePatterns():
 
         if args.patterns_map:
             self.patterns_from_user = args.patterns_map
-            self.processed_patterns = self.parallel_runs(
-                args.patterns_map.keys()
-            )
 
             pool = mp.Pool(processes=len(args.patterns_map.keys()))
             pool.map(self.find_pattern, args.patterns_map.keys())
@@ -104,22 +89,6 @@ class HandlePatterns():
             }
         }
 
-    @staticmethod
-    def check_match_parallel(self, reg_expression, buffer):
-        return reg_expression.search(buffer)
-
-    def is_match(self, buffer, offset, min_matched):
-        all_matched = []
-        for reg in self.processed_patterns:
-            match = reg['regex'].search(buffer)
-            if match:
-                min_matched = match.start() if min_matched == -1 else max(min_matched, match.start())
-                all_matched.append(match)
-                self.matched_patterns.append(
-                    self.search_match_in_row(reg['pattern_from_user'], match.start(), offset, match.end())
-                )
-        return min_matched
-
     def find_pattern(self, pattern):
         end = 0
         fh_name = self.file_name
@@ -152,7 +121,7 @@ class HandlePatterns():
                     buffer = buffer[read_size:]
                     buffer += fh_read.read(read_size)
                     match = regex_search(buffer)
-                    match = -1 if match == None else match.start()
+                    match = -1 if match is None else match.start()
                 else:
                     if match == -1 and offset + match > end:
                         return
@@ -161,7 +130,7 @@ class HandlePatterns():
                     self.matched_patterns.append(
                         self.search_match_in_row(
                             origin_pattern, find_offset, find_offset, find_offset + len_pattern,
-                        )
+                                                                      )
                     )
 
                     match = regex_search(buffer, match + 1)
@@ -170,11 +139,10 @@ class HandlePatterns():
                     if not os.path.exists(DIR_NAME):
                         os.makedirs(DIR_NAME)
                     base_filename = uuid.uuid4()
-                    file_name_unique = os.path.join(DIR_NAME, str(base_filename) + __FILE_NAME_SUFFIX__)
+                    file_name_unique = os.path.join(DIR_NAME, str(BASE_FILE_NAME) + __FILE_NAME_SUFFIX__)
                     with open(file_name_unique, 'w', encoding='utf-8') as file_to_write:
                         json.dump(self.matched_patterns, file_to_write, ensure_ascii=False, indent=4)
                     return
-
         except Exception as e:
             print('err')
             print(e)
@@ -199,17 +167,16 @@ class HandlePatterns():
         file_to_read = open(self.file_name, 'rb')
         for chuck in self.read_in_chunks(file_to_read):
             iter_chunk = regex.finditer(chuck.hex())
-            if iter_chunk:
-                for it in iter_chunk:
-                    start_point = (int(it.start() / 2) + (32 * iter_start_point))
-                    grouped_pattern = it.group()
-                    if byte_to_find != grouped_pattern:
-                        data['repeating_bytes'].append(
-                            dict(
-                                range=(start_point, start_point + int(len(grouped_pattern) / 2) - 1),
-                                repeating_byte=grouped_pattern
-                            )
-                        )
+            for it in iter_chunk:
+                start_point = (int(it.start() / 2) + (32 * iter_start_point))
+                if byte_to_find != it.group():
+                    data['repeating_bytes'].append(
+                        dict(range=(
+                            start_point,
+                            start_point + int(len(it.group()) / 2) - 1),
+                            repeating_byte=it.group(),
+                        ),
+                    )
             iter_start_point += 32
         file_to_read.close()
 
