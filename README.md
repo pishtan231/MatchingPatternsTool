@@ -16,10 +16,10 @@ EXAMPLES
 Search for the hex bytes "C54C6BA5FEE1", "CDD0F08AE8" in the file some_file.bin:
 
 
-python bin24.py -g {\"A54C6BA5FEE1\":\"value1\"\,\"BDD0F08AE8\":\"value3\} -f some_file.bin -r
+python bin24.py -g {\"A54C6BA5FEE1\":\"value1\"\,\"BDD0F08AE8\":\"value3\} -f some_file.bin -r True
 
 Will replace data in file and will also produce produce JSON, e.g:
-[
+`[
     {
         "Pattern": "A54C6BA5FEE1",
         "Start_offset": {
@@ -42,14 +42,14 @@ Will replace data in file and will also produce produce JSON, e.g:
             "Hexadecimal": "16F419E86"
         }
     }
-]
+]`
 
 You can Input patterns as a list
 python bin24.py -z "FF64FF" "A4A5A6" "AE" -f my_file.bin
 
 Will produce JSON, e.g:
 
-{
+`{
     "repeating_bytes": [
         {
             "range": [
@@ -92,13 +92,13 @@ Will produce JSON, e.g:
             "repeating_byte": "AE"
         }
     ]
-}
+}`
 ********
 
 python bin24.py -g {\"C54C6BA5FEE1\":\"value1\"\,\"CDD0F08AE8\":\"value3\"} -f some_file.bin 
 
 Will produce JSON, e.g:
-[
+`[
     {
         "Pattern": "C54C6BA5FEE1",
         "Start_offset": {
@@ -122,7 +122,7 @@ Will produce JSON, e.g:
         }
     }
 ]
-
+`
 
 python main.py -z "/xaf" -f some_file.bin
 
@@ -130,7 +130,7 @@ will produce json with all the repeating bytes
 
 Will produce JSON, e.g:
 
-{
+`{
     "repeating_bytes": [
         {
             "range": [
@@ -174,17 +174,17 @@ Will produce JSON, e.g:
         }
     ]
 }
-
+`
 
 Searches for the hexidecimal pattern "PA##TT##ERN" in some_file will produce 
 JSON with values where ##=ANy valid char=.*
 python main.py -p "PA##TT##ERN" some_file.bin
 
-[
+`[
 "PATTERN",
 PAA3TTA4EN",
 ...
-]
+]`
 
 args optionS
 
@@ -195,7 +195,5 @@ Optional Arguments:
  
   -r replace, --replace replace bin/hex with map vals
                         
-  -l FILE, --log FILE   write matched offsets to FILE, instead of standard
-                        output
   -z, --zlist          list of pattern to search
                     
